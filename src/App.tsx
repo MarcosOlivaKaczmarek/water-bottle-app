@@ -1,15 +1,18 @@
 import ProgressBar from './components/ProgressBar'
 import WaterIntakeChart from './components/WaterIntakeChart'
+import Counter from './components/Counter'
 
 function App() {
-  const progress = 5 // Example: 5 glasses of water
-
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold">Water Bottle App</h1>
-      <p>Welcome to the water intake tracking app!</p>
-      <ProgressBar progress={progress} />
-      <WaterIntakeChart />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Water Bottle App
+        </h1>
+        <Counter />
+        <ProgressBar />
+        <WaterIntakeChart />
+      </div>
     </div>
   )
 }
