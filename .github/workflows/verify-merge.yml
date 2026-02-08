@@ -1,0 +1,42 @@
+name: Verify Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Required to fetch all history for checking merges
+
+      - name: Verify all PRs are merged
+        run: |
+          # Get the list of closed pull requests
+          prs=$(gh pr list --state merged --limit 1000 --json number -q '.[].number')
+
+          # If there are no merged PRs, exit
+          if [ -z "$prs" ]; then
+            echo "No merged pull requests found."
+            exit 0
+          fi
+
+          # Iterate through each pull request and verify it's merged into main
+          echo "Verifying the following PRs: $prs"
+          for pr_number in $prs; do
+            # Check if the merge commit exists in the main branch
+            if git log --grep="Merge pull request #$pr_number" --oneline | grep -q "Merge pull request #$pr_number"; then
+              echo "PR #$pr_number is merged."
+            else
+              echo "Error: PR #$pr_number is NOT merged into main."
+              exit 1
+            fi
+          done
+
+          echo "All pull requests are successfully merged into main."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
