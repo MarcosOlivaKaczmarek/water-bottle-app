@@ -74,7 +74,7 @@ const WaterIntakeCounter: React.FC = () => {
         <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
           <div className="max-w-md mx-auto">
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-800">Water Intake Tracker</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Water Intake Tracker</h1>
             </div>
             <div className="divide-y divide-gray-200">
               <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">

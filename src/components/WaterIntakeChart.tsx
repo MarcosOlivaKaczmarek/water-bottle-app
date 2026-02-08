@@ -10,15 +10,16 @@ const WaterIntakeChart: React.FC<WaterIntakeChartProps> = ({ data }) => {
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="w-full">
+    <div className="w-full mt-6">
+      <h2 className="text-lg font-semibold text-gray-700 mb-2">Weekly Intake</h2>
       <div className="flex justify-between items-end h-32">
         {barHeights.map((height, index) => (
           <div key={index} className="flex flex-col items-center">
             <div
-              className="bg-blue-500 w-6 rounded-md transition-all duration-300"
+              className="bg-blue-500 w-6 rounded-md transition-all duration-300 hover:bg-blue-700"
               style={{ height: `${height}%` }}
             ></div>
-            <div className="text-xs mt-1">{days[index]}</div>
+            <div className="text-xs mt-1 text-gray-500">{days[index]}</div>
           </div>
         ))}
       </div>
