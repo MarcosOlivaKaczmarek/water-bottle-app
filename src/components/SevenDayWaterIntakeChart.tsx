@@ -1,10 +1,9 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { WaterIntakeContext } from '../context/WaterIntakeContext'
 
-interface Props {
-  dailyIntake: number[]
-}
+const SevenDayWaterIntakeChart = () => {
+  const { dailyIntake } = useContext(WaterIntakeContext)
 
-const SevenDayWaterIntakeChart: React.FC<Props> = ({ dailyIntake }) => {
   const maxIntake = Math.max(...dailyIntake, 1) // Ensure maxIntake is at least 1 to avoid division by zero
 
   const getDayLabel = (index: number): string => {

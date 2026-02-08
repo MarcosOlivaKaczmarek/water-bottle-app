@@ -1,33 +1,25 @@
-import React, { useState } from 'react'
+import React, { useContext } from 'react'
+import { WaterIntakeContext } from '../context/WaterIntakeContext'
 
 const WaterIntakeCounter: React.FC = () => {
-  const [count, setCount] = useState(0)
-
-  const increment = () => {
-    setCount(count + 1)
-  }
-
-  const decrement = () => {
-    if (count > 0) {
-      setCount(count - 1)
-    }
-  }
+  const { intake, incrementIntake, decrementIntake } = useContext(WaterIntakeContext)
 
   return (
     <div className="flex items-center justify-center space-x-4">
       <button
-        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-        onClick={decrement}
+        className="rounded-full bg-red-500 py-2 px-4 font-bold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-red-300"
+        onClick={decrementIntake}
         aria-label="Decrement water intake"
+        disabled={intake <= 0}
       >
         -
       </button>
-      <span className="text-2xl font-bold" data-testid="water-intake-count">
-        {count}
+      <span className="text-2xl font-bold text-gray-800" data-testid="water-intake-count">
+        {intake}
       </span>
       <button
-        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        onClick={increment}
+        className="rounded-full bg-blue-500 py-2 px-4 font-bold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        onClick={incrementIntake}
         aria-label="Increment water intake"
       >
         +
