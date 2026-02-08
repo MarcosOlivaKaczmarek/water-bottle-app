@@ -10,6 +10,10 @@ const ProgressBar = () => {
       <div
         className="bg-blue-500 h-2.5 rounded-full transition-all duration-500 ease-out"
         style={{ width: `${percentage}%` }}
+        aria-valuenow={percentage}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        role="progressbar"
       ></div>
     </div>
   )
