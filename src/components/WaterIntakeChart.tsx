@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { WaterIntakeContext } from '../context/WaterIntakeContext'
 
 const WaterIntakeChart = () => {
-  const dailyIntake = [0, 0, 0, 0, 0, 0, 0]
+  const { dailyIntake } = useContext(WaterIntakeContext)
   const maxIntake = Math.max(...dailyIntake)
 
   return (
@@ -13,7 +14,7 @@ const WaterIntakeChart = () => {
           return (
             <div key={index} className="flex flex-col items-center">
               <div
-                className="bg-blue-500 w-6 mb-1"
+                className="bg-blue-500 w-6 mb-1 transition-all duration-300"
                 style={{ height: `${barHeight}%` }}
               ></div>
               <span className="text-xs">{getDayLabel(index)}</span>
