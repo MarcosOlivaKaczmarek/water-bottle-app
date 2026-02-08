@@ -29,6 +29,9 @@ function App() {
           </div>
         </div>
       </div>
+      <footer className="bg-gray-200 text-center py-4 text-sm text-gray-500 mt-auto w-full">
+        Version 1.2.0 - © 2026
+      </footer>
     </WaterIntakeProvider>
   )
 }
