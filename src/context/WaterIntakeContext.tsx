@@ -16,14 +16,47 @@ const defaultContextValue: WaterIntakeContextProps = {
 
 export const WaterIntakeContext = createContext(defaultContextValue)
 
+const useLocalStorage = () => {
+  const [isAvailable, setIsAvailable] = useState(false)
+
+  useEffect(() => {
+    try {
+      const testKey = '__test__'
+      localStorage.setItem(testKey, testKey)
+      localStorage.removeItem(testKey)
+      setIsAvailable(true)
+    } catch (e) {
+      setIsAvailable(false)
+    }
+  }, [])
+
+  return isAvailable
+}
+
 export const WaterIntakeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [intake, setIntake] = useState(0)
-  const [dailyIntake, setDailyIntake] = useState<number[]>(
-    Array(7).fill(0),
-  )
+  const localStorageAvailable = useLocalStorage()
+  const [intake, setIntake] = useState(() => {
+    const storedIntake = localStorageAvailable
+      ? localStorage.getItem('intake')
+      : null
+    return storedIntake ? parseInt(storedIntake, 10) : 0
+  })
+  const [dailyIntake, setDailyIntake] = useState<number[]>(() => {
+    const storedDailyIntake = localStorageAvailable
+      ? localStorage.getItem('dailyIntake')
+      : null
+    return storedDailyIntake ? JSON.parse(storedDailyIntake) : Array(7).fill(0)
+  })
   const [currentDayIndex, setCurrentDayIndex] = useState(new Date().getDay())
+
+  useEffect(() => {
+    if (localStorageAvailable) {
+      localStorage.setItem('intake', String(intake))
+      localStorage.setItem('dailyIntake', JSON.stringify(dailyIntake))
+    }
+  }, [intake, dailyIntake, localStorageAvailable])
 
   useEffect(() => {
     const intervalId = setInterval(() => {
