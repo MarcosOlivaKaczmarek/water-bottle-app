@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.water-bottle-app.rule=Host(`water-bottle.apps.example.com`)
+      - traefik.http.routers.water-bottle-app.entrypoints=websecure
+      - traefik.http.routers.water-bottle-app.tls.certresolver=letsencrypt
+      - traefik.http.services.water-bottle-app.loadbalancer.server.port=80
+    networks:
+      - traefik-public
+
+networks:
+  traefik-public:
+    external: true
