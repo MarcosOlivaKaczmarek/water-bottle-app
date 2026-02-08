@@ -1,22 +1,23 @@
-import React from 'react'
+import React, { useContext } from 'react'
+import { WaterIntakeContext } from '../context/WaterIntakeContext'
 
 const WaterIntakeChart = () => {
-  const dailyIntake = [3, 5, 2, 6, 4, 7, 3]
+  const { dailyIntake } = useContext(WaterIntakeContext)
   const maxIntake = Math.max(...dailyIntake)
 
   return (
-    <div className="w-full mb-4">
+    <div className="w-full">
       <h2 className="text-lg font-semibold mb-2">7-Day Water Intake</h2>
       <div className="flex items-end h-32 border-b border-gray-300">
         {dailyIntake.map((intake, index) => {
           const barHeight = maxIntake > 0 ? (intake / maxIntake) * 100 : 0
           return (
-            <div key={index} className="flex flex-col items-center mx-1">
+            <div key={index} className="flex flex-col items-center">
               <div
                 className="bg-blue-500 w-6 mb-1 transition-all duration-300"
                 style={{ height: `${barHeight}%` }}
               ></div>
-              <span className="text-xs text-gray-600">{getDayLabel(index)}</span>
+              <span className="text-xs">{getDayLabel(index)}</span>
             </div>
           )
         })}

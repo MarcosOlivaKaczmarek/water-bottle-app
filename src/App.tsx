@@ -1,19 +1,19 @@
+import Counter from './components/Counter'
 import ProgressBar from './components/ProgressBar'
 import WaterIntakeChart from './components/WaterIntakeChart'
-import Counter from './components/Counter'
+import { WaterIntakeProvider } from './context/WaterIntakeContext'
 
 function App() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Water Bottle App
-        </h1>
+    <WaterIntakeProvider>
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold">Water Bottle App</h1>
+        <p>Welcome to the water intake tracking app!</p>
         <Counter />
         <ProgressBar />
         <WaterIntakeChart />
       </div>
-    </div>
+    </WaterIntakeProvider>
   )
 }
 
