@@ -40,5 +40,6 @@ CREATE TABLE water_bottle_profiles (
 
 -- Add indexes for frequently queried columns
 CREATE INDEX idx_water_intake_logs_user_id ON water_intake_logs (user_id);
+CREATE INDEX idx_water_intake_logs_timestamp ON water_intake_logs (timestamp);
 CREATE INDEX idx_goals_user_id ON goals (user_id);
 CREATE INDEX idx_water_bottle_profiles_user_id ON water_bottle_profiles (user_id);
