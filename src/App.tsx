@@ -6,11 +6,17 @@ import ProgressBar from './components/ProgressBar'
 import Counter from './components/Counter'
 import AuthPage from './pages/AuthPage'
 import GoalSetting from './components/GoalSetting'
+import WaterLogging from './components/WaterLogging'
 
 function App() {
   const handleGoalSet = (goal: number) => {
     // Implement logic to save the goal to the backend or local storage
     console.log('Goal set to:', goal)
+  }
+
+  const handleLogWater = (amount: number) => {
+    // Implement logic to save the water intake to the backend or local storage
+    console.log('Water intake logged:', amount)
   }
 
   return (
@@ -28,6 +34,10 @@ function App() {
 
           <div className="rounded-md bg-white p-6 shadow-md">
             <GoalSetting onGoalSet={handleGoalSet} />
+          </div>
+
+          <div className="rounded-md bg-white p-6 shadow-md">
+            <WaterLogging onLogWater={handleLogWater} />
           </div>
 
           <div className="rounded-md bg-white p-6 shadow-md">
