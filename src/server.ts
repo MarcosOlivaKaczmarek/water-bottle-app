@@ -9,10 +9,11 @@ dotenv.config()
 
 const app = express()
 const port = process.env.PORT || 3000
-const jwtSecret = process.env.AUTH_JWT_SECRET
+const jwtSigningKey = process.env.JWT_SIGNING_KEY
+const bcryptSaltRounds = process.env.BCRYPT_SALT_ROUNDS ? parseInt(process.env.BCRYPT_SALT_ROUNDS) : 10
 
-if (!jwtSecret) {
-  console.error('JWT secret is not defined. Exiting...')
+if (!jwtSigningKey) {
+  console.error('JWT signing key is not defined. Exiting...')
   process.exit(1)
 }
 
@@ -38,19 +39,27 @@ try {
   process.exit(1)
 }
 
+// Extend the Request interface to include the user property
+interface CustomRequest extends Request {
+  user?: {
+    id: number
+    username: string
+  }
+}
+
 // Middleware to verify JWT token
-const verifyToken = (req: Request, res: Response, next: NextFunction) => {
+const verifyToken = (req: CustomRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization
 
   if (authHeader) {
     const token = authHeader.split(' ')[1]
 
-    jwt.verify(token, jwtSecret, (err: any, user: any) => {
+    jwt.verify(token, jwtSigningKey, (err: any, decoded: any) => {
       if (err) {
         return res.status(403).json({ message: 'Invalid token' })
       }
 
-      req.user = user
+      req.user = { id: decoded.id, username: decoded.username }
       next()
     })
   } else {
@@ -75,7 +84,7 @@ app.post(
     const { username, email, password } = req.body
 
     try {
-      const hashedPassword = await bcrypt.hash(password, 10)
+      const hashedPassword = await bcrypt.hash(password, bcryptSaltRounds)
 
       const result = await pool.query(
         'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email', // Returning email as well
@@ -84,7 +93,7 @@ app.post(
 
       const user = result.rows[0]
 
-      const token = jwt.sign({ id: user.id, username: user.username }, jwtSecret, { expiresIn: '1h' })
+      const token = jwt.sign({ id: user.id, username: user.username }, jwtSigningKey, { expiresIn: '1h' })
 
       res.status(201).json({ message: 'User registered successfully', user, token })
     } catch (error: any) {
@@ -128,7 +137,7 @@ app.post(
         return res.status(401).json({ message: 'Invalid credentials' })
       }
 
-      const token = jwt.sign({ id: user.id, username: user.username }, jwtSecret, { expiresIn: '1h' })
+      const token = jwt.sign({ id: user.id, username: user.username }, jwtSigningKey, { expiresIn: '1h' })
 
       // Include email in the response for consistency
       res.status(200).json({ message: 'Login successful', user: { id: user.id, username: user.username, email: user.email }, token })
@@ -140,19 +149,60 @@ app.post(
 )
 
 // Logout endpoint (client-side implementation, server-side invalidation not feasible with JWT)
-app.post('/logout', verifyToken, (req: Request, res: Response) => {
+app.post('/logout', verifyToken, (req: CustomRequest, res: Response) => {
   // On the client-side, the token should be removed from storage (e.g., localStorage, cookies)
   res.status(200).json({ message: 'Logout successful' })
 })
 
+// Water intake logging endpoint
+app.post(
+  '/water-intake',
+  verifyToken,
+  [
+    body('quantity_ml')
+      .isInt({ min: 1 }) // Ensure quantity is a positive integer
+      .withMessage('Quantity must be a positive integer'),
+  ],
+  async (req: CustomRequest, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
+
+    const { quantity_ml } = req.body
+    const userId = req.user?.id // Access user ID from the verified token
+
+    if (!userId) {
+      return res.status(401).json({ message: 'User ID not found in token' })
+    }
+
+    try {
+      const result = await pool.query(
+        'INSERT INTO water_intake_logs (user_id, quantity_ml) VALUES ($1, $2) RETURNING id, user_id, quantity_ml, timestamp',
+        [userId, quantity_ml],
+      )
+
+      const log = result.rows[0]
+      res.status(201).json({ message: 'Water intake logged successfully', log })
+    } catch (error: any) {
+      console.error('Error logging water intake:', error)
+      res.status(500).json({ message: 'Failed to log water intake' })
+    }
+  },
+)
+
 // Example protected route
-app.get('/profile', verifyToken, (req: Request, res: Response) => {
+app.get('/profile', verifyToken, (req: CustomRequest, res: Response) => {
   res.status(200).json({ message: 'Protected route accessed', user: req.user })
 })
 
 // Centralized error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack)
+  if (err instanceof jwt.JsonWebTokenError) {
+    return res.status(401).json({ message: 'Invalid JWT token' })
+  }
+  // More specific error handling can be added here based on the error type
   res.status(500).json({ message: 'Something went wrong!' })
 })
 
