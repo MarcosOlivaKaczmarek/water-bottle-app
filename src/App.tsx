@@ -5,8 +5,14 @@ import SevenDayWaterIntakeChart from './components/SevenDayWaterIntakeChart'
 import ProgressBar from './components/ProgressBar'
 import Counter from './components/Counter'
 import AuthPage from './pages/AuthPage'
+import GoalSetting from './components/GoalSetting'
 
 function App() {
+  const handleGoalSet = (goal: number) => {
+    // Implement logic to save the goal to the backend or local storage
+    console.log('Goal set to:', goal)
+  }
+
   return (
     <WaterIntakeProvider>
       <div className="flex min-h-screen flex-col items-center justify-start bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -18,6 +24,10 @@ function App() {
             <p className="mt-2 text-center text-sm text-gray-600">
               Track your daily water consumption and stay hydrated!
             </p>
+          </div>
+
+          <div className="rounded-md bg-white p-6 shadow-md">
+            <GoalSetting onGoalSet={handleGoalSet} />
           </div>
 
           <div className="rounded-md bg-white p-6 shadow-md">
