@@ -1,7 +1,9 @@
-import express from 'express';
+// src/types/express/index.d.ts
 
-declare module 'express' {
-  export interface Request {
-    userId?: number;
+declare global {
+  namespace Express {
+    interface Request {
+      user?: { id: number; email: string }
+    }
   }
 }
