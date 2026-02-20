@@ -12,6 +12,7 @@ import ReminderSetup from './components/ReminderSetup'
 import HistoricalData from './components/HistoricalData'
 import WaterBottleProfiles from './components/WaterBottleProfiles'
 import SettingsPage from './pages/SettingsPage'
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom'
 
 function App() {
   const handleGoalSet = (goal: number) => {
@@ -26,54 +27,68 @@ function App() {
 
   return (
     <WaterIntakeProvider>
-      <div className="flex min-h-screen flex-col items-center justify-start bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-3xl space-y-8">
-          <div>
-            <h1 className="text-center text-3xl font-extrabold text-gray-900">
-              Water Intake Tracker
-            </h1>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Track your daily water consumption and stay hydrated!
-            </p>
-          </div>
+      <Router>
+        <div className="flex min-h-screen flex-col items-center justify-start bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+          <div className="w-full max-w-3xl space-y-8">
+            <div>
+              <h1 className="text-center text-3xl font-extrabold text-gray-900">
+                Water Intake Tracker
+              </h1>
+              <p className="mt-2 text-center text-sm text-gray-600">
+                Track your daily water consumption and stay hydrated!
+              </p>
+            </div>
 
-          <div className="rounded-md bg-white p-6 shadow-md">
-            <GoalSetting onGoalSet={handleGoalSet} />
-          </div>
+            <nav className="space-x-4 text-center">
+              <Link to="/" className="text-blue-500 hover:text-blue-700">Home</Link>
+              <Link to="/settings" className="text-blue-500 hover:text-blue-700">Settings</Link>
+            </nav>
 
-          <div className="rounded-md bg-white p-6 shadow-md">
-            <WaterLogging onLogWater={handleLogWater} />
-          </div>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <>
+                    <div className="rounded-md bg-white p-6 shadow-md">
+                      <GoalSetting onGoalSet={handleGoalSet} />
+                    </div>
 
-          <div className="rounded-md bg-white p-6 shadow-md">
-            <ProgressBar />
-            <Counter />
-          </div>
+                    <div className="rounded-md bg-white p-6 shadow-md">
+                      <WaterLogging onLogWater={handleLogWater} />
+                    </div>
 
-          <div className="rounded-md bg-white p-6 shadow-md">
-            <SevenDayWaterIntakeChart dailyIntake={[1, 2, 3, 4, 5, 6, 7]} />
+                    <div className="rounded-md bg-white p-6 shadow-md">
+                      <ProgressBar />
+                      <Counter />
+                    </div>
+
+                    <div className="rounded-md bg-white p-6 shadow-md">
+                      <SevenDayWaterIntakeChart dailyIntake={[1, 2, 3, 4, 5, 6, 7]} />
+                    </div>
+                    <div className="rounded-md bg-white p-6 shadow-md">
+                      <CircularProgressChart />
+                    </div>
+                    <div className="rounded-md bg-white p-6 shadow-md">
+                      <ReminderSetup />
+                    </div>
+                    <div className="rounded-md bg-white p-6 shadow-md">
+                      <HistoricalData />
+                    </div>
+                    <div className="rounded-md bg-white p-6 shadow-md">
+                      <WaterBottleProfiles />
+                    </div>
+                    <AuthPage />
+                  </>
+                }
+              />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Routes>
           </div>
-          <div className="rounded-md bg-white p-6 shadow-md">
-            <CircularProgressChart />
-          </div>
-          <div className="rounded-md bg-white p-6 shadow-md">
-            <ReminderSetup />
-          </div>
-          <div className="rounded-md bg-white p-6 shadow-md">
-            <HistoricalData />
-          </div>
-          <div className="rounded-md bg-white p-6 shadow-md">
-            <WaterBottleProfiles />
-          </div>
-          <div className="rounded-md bg-white p-6 shadow-md">
-            <SettingsPage />
-          </div>
-          <AuthPage />
         </div>
-      </div>
-      <footer className="bg-gray-200 text-center py-4 text-sm text-gray-500 mt-auto w-full">
-        Version 1.2.0 - © 2026
-      </footer>
+        <footer className="bg-gray-200 text-center py-4 text-sm text-gray-500 mt-auto w-full">
+          Version 1.2.0 - © 2026
+        </footer>
+      </Router>
     </WaterIntakeProvider>
   )
 }
