@@ -11,6 +11,7 @@ import CircularProgressChart from './components/CircularProgressChart'
 import ReminderSetup from './components/ReminderSetup'
 import HistoricalData from './components/HistoricalData'
 import WaterBottleProfiles from './components/WaterBottleProfiles'
+import SettingsPage from './pages/SettingsPage'
 
 function App() {
   const handleGoalSet = (goal: number) => {
@@ -63,6 +64,9 @@ function App() {
           </div>
           <div className="rounded-md bg-white p-6 shadow-md">
             <WaterBottleProfiles />
+          </div>
+          <div className="rounded-md bg-white p-6 shadow-md">
+            <SettingsPage />
           </div>
           <AuthPage />
         </div>
