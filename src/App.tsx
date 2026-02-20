@@ -10,6 +10,7 @@ import WaterLogging from './components/WaterLogging'
 import CircularProgressChart from './components/CircularProgressChart'
 import ReminderSetup from './components/ReminderSetup'
 import HistoricalData from './components/HistoricalData'
+import WaterBottleProfiles from './components/WaterBottleProfiles'
 
 function App() {
   const handleGoalSet = (goal: number) => {
@@ -59,6 +60,9 @@ function App() {
           </div>
           <div className="rounded-md bg-white p-6 shadow-md">
             <HistoricalData />
+          </div>
+          <div className="rounded-md bg-white p-6 shadow-md">
+            <WaterBottleProfiles />
           </div>
           <AuthPage />
         </div>
