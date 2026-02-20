@@ -4,6 +4,7 @@ import { WaterIntakeProvider } from './context/WaterIntakeContext'
 import SevenDayWaterIntakeChart from './components/SevenDayWaterIntakeChart'
 import ProgressBar from './components/ProgressBar'
 import Counter from './components/Counter'
+import AuthPage from './pages/AuthPage'
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <div className="rounded-md bg-white p-6 shadow-md">
             <SevenDayWaterIntakeChart dailyIntake={[1, 2, 3, 4, 5, 6, 7]} />
           </div>
+          <AuthPage />
         </div>
       </div>
       <footer className="bg-gray-200 text-center py-4 text-sm text-gray-500 mt-auto w-full">
