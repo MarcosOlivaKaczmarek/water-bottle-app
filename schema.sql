@@ -38,8 +38,18 @@ CREATE TABLE water_bottle_profiles (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- Table: hydration_reminders
+CREATE TABLE hydration_reminders (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    cron_expression VARCHAR(255) NOT NULL,
+    quantity_ml INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 -- Add indexes for frequently queried columns
 CREATE INDEX idx_water_intake_logs_user_id ON water_intake_logs (user_id);
 CREATE INDEX idx_water_intake_logs_timestamp ON water_intake_logs (timestamp);
 CREATE INDEX idx_goals_user_id ON goals (user_id);
 CREATE INDEX idx_water_bottle_profiles_user_id ON water_bottle_profiles (user_id);
+CREATE INDEX idx_hydration_reminders_user_id ON hydration_reminders (user_id);
