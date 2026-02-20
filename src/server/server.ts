@@ -1,91 +1,109 @@
-import express, { Request, Response } from 'express'
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+import express from 'express'
+import { Request, Response } from 'express'
 import { Pool } from 'pg'
 
 const app = express()
-const port = 3001
+const port = 3000
+
+// Environment variables for database connection
+const dbHost = process.env.DB_HOST || 'localhost'
+const dbPort = process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432
+const dbUser = process.env.DB_USER || 'postgres'
+const dbPassword = process.env.DB_PASSWORD || 'postgres'
+const dbName = process.env.DB_NAME || 'water_bottle'
+
+const pool = new Pool({
+  host: dbHost,
+  port: dbPort,
+  user: dbUser,
+  password: dbPassword,
+  database: dbName,
+})
 
 app.use(express.json())
 
-// PostgreSQL connection pool
-const pool = new Pool({
-  user: 'your_db_user',
-  host: 'localhost',
-  database: 'your_db_name',
-  password: 'your_db_password',
-  port: 5432,
-})
-
-// Generate a JWT secret.  Ideally, this should come from an environment variable.
-const jwtSecret = 'your-jwt-secret' // Replace with a strong, randomly generated secret
-
-// Function to generate JWT token
-const generateToken = (user: { id: number; username: string }) => {
-  return jwt.sign(user, jwtSecret, { expiresIn: '1h' })
-}
-
-// Register endpoint
-app.post('/register', async (req: Request, res: Response) => {
+// Endpoint to log water intake
+app.post('/api/water-intake', async (req: Request, res: Response) => {
   try {
-    const { username, email, password } = req.body
+    const { userId, quantityMl, timestamp } = req.body
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10)
+    if (!userId || !quantityMl) {
+      return res
+        .status(400)
+        .json({ error: 'User ID and quantity are required' })
+    }
 
-    // Insert the user into the database
-    const result = await pool.query(
-      'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username', // Returning username
-      [username, email, hashedPassword],
-    )
+    // Insert the water intake log into the database
+    const query = `
+      INSERT INTO water_intake_logs (user_id, quantity_ml, timestamp)
+      VALUES ($1, $2, $3)
+      RETURNING *;
+    `
 
-    const user = result.rows[0]
+    const values = [userId, quantityMl, timestamp || new Date()]
+    const result = await pool.query(query, values)
 
-    // Generate JWT token
-    const token = generateToken(user)
-
-    res.status(201).json({ message: 'User created successfully', token: token, user: user }) // Include user in response
+    res.status(201).json(result.rows[0]) // Respond with the newly created log
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Registration failed' })
+    console.error('Error logging water intake:', error)
+    res.status(500).json({ error: 'Failed to log water intake' })
   }
 })
 
-// Login endpoint
-app.post('/login', async (req: Request, res: Response) => {
+// Endpoint to get water intake trends (daily, weekly, monthly)
+app.get('/api/water-intake-trends', async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body
+    const { userId, period } = req.query
 
-    // Find the user by email
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email])
-    const user = result.rows[0]
-
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' })
+    if (!userId || !period) {
+      return res
+        .status(400)
+        .json({ error: 'User ID and period are required' })
     }
 
-    // Compare passwords
-    const passwordMatch = await bcrypt.compare(password, user.password)
+    const userIdNum = parseInt(userId as string, 10)
 
-    if (!passwordMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' })
+    let query = ''
+    let values: any[] = [userIdNum]
+
+    switch (period) {
+      case 'daily':
+        query = `
+          SELECT date(timestamp) as date, SUM(quantity_ml) as total_quantity
+          FROM water_intake_logs
+          WHERE user_id = $1
+          GROUP BY date(timestamp)
+          ORDER BY date(timestamp) DESC;
+        `
+        break
+      case 'weekly':
+        query = `
+          SELECT date_trunc('week', timestamp) as week_start, SUM(quantity_ml) as total_quantity
+          FROM water_intake_logs
+          WHERE user_id = $1
+          GROUP BY date_trunc('week', timestamp)
+          ORDER BY date_trunc('week', timestamp) DESC;
+        `
+        break
+      case 'monthly':
+        query = `
+          SELECT date_trunc('month', timestamp) as month_start, SUM(quantity_ml) as total_quantity
+          FROM water_intake_logs
+          WHERE user_id = $1
+          GROUP BY date_trunc('month', timestamp)
+          ORDER BY date_trunc('month', timestamp) DESC;
+        `
+        break
+      default:
+        return res.status(400).json({ error: 'Invalid period' })
     }
 
-    // Generate JWT token
-    const token = generateToken({ id: user.id, username: user.username })
-
-    res.status(200).json({ message: 'Logged in successfully', token: token, user: {id: user.id, username: user.username} })
+    const result = await pool.query(query, values)
+    res.json(result.rows)
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Login failed' })
+    console.error('Error fetching water intake trends:', error)
+    res.status(500).json({ error: 'Failed to fetch water intake trends' })
   }
-})
-
-// Logout (client-side, typically involves discarding the token)
-app.post('/logout', (req: Request, res: Response) => {
-  // In a stateless JWT setup, the server doesn't need to do anything.
-  // The client simply discards the token.
-  res.status(200).json({ message: 'Logged out successfully' })
 })
 
 app.listen(port, () => {
