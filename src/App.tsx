@@ -7,6 +7,7 @@ import Counter from './components/Counter'
 import AuthPage from './pages/AuthPage'
 import GoalSetting from './components/GoalSetting'
 import WaterLogging from './components/WaterLogging'
+import CircularProgressChart from './components/CircularProgressChart'
 
 function App() {
   const handleGoalSet = (goal: number) => {
@@ -47,6 +48,9 @@ function App() {
 
           <div className="rounded-md bg-white p-6 shadow-md">
             <SevenDayWaterIntakeChart dailyIntake={[1, 2, 3, 4, 5, 6, 7]} />
+          </div>
+          <div className="rounded-md bg-white p-6 shadow-md">
+            <CircularProgressChart />
           </div>
           <AuthPage />
         </div>
