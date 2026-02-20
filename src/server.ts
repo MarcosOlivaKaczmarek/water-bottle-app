@@ -150,6 +150,57 @@ app.get('/profile', verifyToken, (req: Request, res: Response) => {
   res.status(200).json({ message: 'Protected route accessed', user: req.user })
 })
 
+// Water intake logging endpoint
+app.post(
+  '/water-intake',
+  verifyToken,
+  [
+    body('quantity_ml')
+      .isInt({ min: 1 })
+      .withMessage('Quantity must be a positive integer'),
+  ],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
+
+    const { quantity_ml } = req.body
+    const userId = (req.user as any).id // Extract user ID from the token
+
+    try {
+      const result = await pool.query(
+        'INSERT INTO water_intake_logs (user_id, quantity_ml) VALUES ($1, $2) RETURNING *',
+        [userId, quantity_ml],
+      )
+
+      const logEntry = result.rows[0]
+      res.status(201).json({ message: 'Water intake logged successfully', logEntry })
+    } catch (error) {
+      console.error('Error logging water intake:', error)
+      res.status(500).json({ message: 'Failed to log water intake' })
+    }
+  },
+)
+
+// Get water intake logs for a user
+app.get('/water-intake', verifyToken, async (req: Request, res: Response) => {
+  const userId = (req.user as any).id // Extract user ID from the token
+
+  try {
+    const result = await pool.query(
+      'SELECT * FROM water_intake_logs WHERE user_id = $1 ORDER BY timestamp DESC',
+      [userId],
+    )
+
+    const logs = result.rows
+    res.status(200).json({ logs })
+  } catch (error) {
+    console.error('Error fetching water intake logs:', error)
+    res.status(500).json({ message: 'Failed to fetch water intake logs' })
+  }
+})
+
 // Centralized error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack)
