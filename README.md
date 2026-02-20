@@ -17,3 +17,7 @@ This project uses GitHub Actions for Continuous Integration and Continuous Deplo
 ### Verify Merge
 
 - A GitHub Actions workflow (`.github/workflows/verify-merge.yml`) is set up to automatically verify that all pull requests have been successfully merged into the `main` branch. This workflow is triggered on every push to the `main` branch.
+
+### Netlify Deployment
+
+- The frontend application is also configured for deployment on Netlify. The `netlify.toml` file contains the build and deployment settings for Netlify.
