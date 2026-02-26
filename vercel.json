@@ -1,31 +1,39 @@
 {
   "version": 2,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*" 
+      "src": "dist/server/server.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["dist/client/**"]
+      }
     },
     {
-      "source": "/:path*",
-      "destination": "/index.html"
+      "src": "dist/client/**",
+      "use": "@vercel/static",
+      "dest": "dist"
     }
   ],
-  "trailingSlash": false,
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "dist/server/server.js"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
   "github": {
-    "silent": true
+    "silent": false
   },
   "headers": [
     {
-      "source": "/",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
+      "source": "/static/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
