@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -20,20 +23,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Clean dist directory
+        run: rm -rf dist
 
       - name: Build frontend assets
         run: npm run build
 
+      - name: Create server directory
+        run: mkdir -p dist/server
+
+      - name: Build server code
+        run: tsc --project tsconfig.server.json
+
       - name: Copy client assets
         run: cp -r dist/client/* dist/
 
-      - name: Build server code
-        run: mkdir -p dist/server && echo "// server code" > dist/server/server.js
-
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v20
+        uses: BetaHuhn/deploy-to-vercel-action@v1
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}

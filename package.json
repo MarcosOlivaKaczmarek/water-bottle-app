@@ -10,8 +10,7 @@
     "preview": "vite preview",
     "format": "prettier --write .",
     "start": "node dist/server/server.js",
-    "vercel-build": "tsc && vite build",
-    "build:frontend": "tsc && vite build"
+    "vercel-build": "tsc && vite build"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
