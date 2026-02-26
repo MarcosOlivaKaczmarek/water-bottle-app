@@ -1,14 +1,9 @@
 {
   "version": 2,
-  "cleanUrls": true,
   "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/:path*",
-      "destination": "/index.html"
-    }
+    // Route API requests to the serverless function
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    // Serve static files from the root directory
+    { "source": "/:path*", "destination": "/index.html" }
   ]
 }
