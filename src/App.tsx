@@ -4,7 +4,6 @@ import { WaterIntakeProvider } from './context/WaterIntakeContext'
 import SevenDayWaterIntakeChart from './components/SevenDayWaterIntakeChart'
 import ProgressBar from './components/ProgressBar'
 import Counter from './components/Counter'
-import AuthPage from './pages/AuthPage'
 import GoalSetting from './components/GoalSetting'
 import WaterLogging from './components/WaterLogging'
 import CircularProgressChart from './components/CircularProgressChart'
@@ -14,6 +13,7 @@ import WaterBottleProfiles from './components/WaterBottleProfiles'
 import SettingsPage from './pages/SettingsPage'
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom'
 import RegisterPage from './pages/RegisterPage'
+import LoginPage from './pages/LoginPage'
 
 function App() {
   const [isMobile, setIsMobile] = useState(false)
@@ -72,7 +72,7 @@ function App() {
                     <Routes>
                       <Route
                         path="/"
-                        element={
+                        element={(
                           <>
                             <div className="rounded-md bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
                               <GoalSetting onGoalSet={handleGoalSet} />
@@ -102,12 +102,12 @@ function App() {
                             <div className="rounded-md bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
                               <WaterBottleProfiles />
                             </div>
-                            <AuthPage />
                           </>
-                        }
+                        )}
                       />
                       <Route path="/settings" element={<SettingsPage />} />
                       <Route path="/register" element={<RegisterPage />} />
+                      <Route path="/login" element={<LoginPage />} />
                     </Routes>
                   </div>
                 </div>
