@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import WaterIntakeCounter from './components/WaterIntakeCounter'
+import WaterIntakeCounter from './WaterIntakeCounter'
 import { WaterIntakeProvider } from './context/WaterIntakeContext'
 import SevenDayWaterIntakeChart from './components/SevenDayWaterIntakeChart'
 import ProgressBar from './components/ProgressBar'
@@ -17,6 +17,7 @@ import LoginPage from './pages/LoginPage'
 
 function App() {
   const [isMobile, setIsMobile] = useState(false)
+  const [recommendation, setRecommendation] = useState<string | null>(null)
 
   useEffect(() => {
     const handleResize = () => {
@@ -29,6 +30,24 @@ function App() {
     return () => {
       window.removeEventListener('resize', handleResize)
     }
+  }, [])
+
+  useEffect(() => {
+    const fetchRecommendation = async () => {
+      try {
+        const response = await fetch('/api/recommendations')
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        const data = await response.json()
+        setRecommendation(data.recommendation)
+      } catch (error) {
+        console.error('Failed to fetch recommendation:', error)
+        setRecommendation('Could not retrieve recommendation.')
+      }
+    }
+
+    fetchRecommendation()
   }, [])
 
   const handleGoalSet = (goal: number) => {
@@ -72,8 +91,12 @@ function App() {
                     <Routes>
                       <Route
                         path="/"
-                        element={(
-                          <>
+                        element={(<> 
+                            {recommendation && (
+                              <div className="rounded-md bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
+                                <p className="text-gray-700">Recommendation: {recommendation}</p>
+                              </div>
+                            )}
                             <div className="rounded-md bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
                               <GoalSetting onGoalSet={handleGoalSet} />
                             </div>
