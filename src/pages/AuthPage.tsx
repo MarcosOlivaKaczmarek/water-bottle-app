@@ -1,90 +1,100 @@
 import React, { useState } from 'react'
-import LoginForm from '../components/auth/LoginForm'
-import RegistrationForm from '../components/auth/RegistrationForm'
-import LogoutButton from '../components/auth/LogoutButton'
 
 const AuthPage = () => {
-  const [token, setToken] = useState<string | null>(null)
-  const [user, setUser] = useState<{
-    id: string
-    username: string
-    email: string
-  } | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [isLogin, setIsLogin] = useState(true)
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState('')
 
-  const handleRegister = async (username: string, email: string, password: string) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const endpoint = isLogin ? '/api/login' : '/api/register'
+    const userData = isLogin ? { email, password } : { username, email, password }
+
     try {
-      const response = await fetch('/register', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify(userData),
       })
 
       const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed')
+      if (response.ok) {
+        setMessage(`Successfully ${isLogin ? 'logged in' : 'registered'}!`)
+        // Store the token in local storage or a cookie
+        localStorage.setItem('token', data.token)
+        // Redirect or update UI as needed
+      } else {
+        setMessage(data.message || 'An error occurred.')
       }
-
-      setToken(data.token)
-      setUser(data.user)
-      setError(null)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (error: any) {
+      setMessage(error.message || 'An unexpected error occurred.')
     }
-  }
-
-  const handleLogin = async (email: string, password: string) => {
-    try {
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed')
-      }
-
-      setToken(data.token)
-      setUser(data.user)
-      setError(null)
-    } catch (err: any) {
-      setError(err.message)
-    }
-  }
-
-  const handleLogout = () => {
-    setToken(null)
-    setUser(null)
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-semibold mb-4 text-center">Authentication</h2>
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-
-        {token ? (
+    <div className="rounded-md bg-white p-6 shadow-md">
+      <h2 className="text-lg font-semibold mb-4">{isLogin ? 'Login' : 'Register'}</h2>
+      {message && <p className="mb-4 text-sm text-green-600">{message}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {!isLogin && (
           <div>
-            <p className="mb-4 text-center">Welcome, {user?.username}!</p>
-            <LogoutButton onLogout={handleLogout} />
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+              Username:
+            </label>
+            <input
+              type="text"
+              id="username"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
           </div>
-        ) : (
-          <>
-            <h3 className="text-xl font-semibold mb-2">Register</h3>
-            <RegistrationForm onRegister={handleRegister} />
-            <h3 className="text-xl font-semibold mt-4 mb-2">Login</h3>
-            <LoginForm onLogin={handleLogin} />
-          </>
         )}
-      </div>
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email:
+          </label>
+          <input
+            type="email"
+            id="email"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            Password:
+          </label>
+          <input
+            type="password"
+            id="password"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <div>
+          <button
+            type="submit"
+            className="rounded-md bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            {isLogin ? 'Login' : 'Register'}
+          </button>
+        </div>
+      </form>
+      <button
+        onClick={() => setIsLogin(!isLogin)}
+        className="mt-4 text-sm text-blue-500 hover:text-blue-700 focus:outline-none"
+      >
+        {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
+      </button>
     </div>
   )
 }
