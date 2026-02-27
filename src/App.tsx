@@ -4,7 +4,6 @@ import { WaterIntakeProvider } from './context/WaterIntakeContext'
 import SevenDayWaterIntakeChart from './components/SevenDayWaterIntakeChart'
 import ProgressBar from './components/ProgressBar'
 import Counter from './components/Counter'
-import AuthPage from './pages/AuthPage'
 import GoalSetting from './components/GoalSetting'
 import WaterLogging from './components/WaterLogging'
 import CircularProgressChart from './components/CircularProgressChart'
@@ -103,7 +102,6 @@ function App() {
                             <div className="rounded-md bg-white p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
                               <WaterBottleProfiles />
                             </div>
-                            <AuthPage />
                           </>
                         )}
                       />
