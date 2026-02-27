@@ -56,3 +56,6 @@ CREATE INDEX idx_water_intake_logs_timestamp ON water_intake_logs (timestamp);
 CREATE INDEX idx_goals_user_id ON goals (user_id);
 CREATE INDEX idx_water_bottle_profiles_user_id ON water_bottle_profiles (user_id);
 CREATE INDEX idx_hydration_reminders_user_id ON hydration_reminders (user_id);
+
+-- Index for water_logs table
+CREATE INDEX idx_water_logs_user_id ON water_intake_logs (user_id);
