@@ -13,6 +13,7 @@ import HistoricalData from './components/HistoricalData'
 import WaterBottleProfiles from './components/WaterBottleProfiles'
 import SettingsPage from './pages/SettingsPage'
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom'
+import RegisterPage from './pages/RegisterPage'
 
 function App() {
   const [isMobile, setIsMobile] = useState(false)
@@ -106,6 +107,7 @@ function App() {
                         }
                       />
                       <Route path="/settings" element={<SettingsPage />} />
+                      <Route path="/register" element={<RegisterPage />} />
                     </Routes>
                   </div>
                 </div>
