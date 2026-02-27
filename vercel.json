@@ -2,44 +2,26 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/server/server.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["dist/client/**"]
-      }
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
     },
     {
-      "src": "dist/client/**",
-      "use": "@vercel/static",
-      "dest": "dist"
+      "src": "src/server/server.ts",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "dist/server/server.js"
+      "dest": "/src/server/server.ts"
     },
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
       "dest": "/index.html"
-    }
-  ],
-  "github": {
-    "silent": false
-  },
-  "headers": [
-    {
-      "source": "/static/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
     }
   ]
 }
