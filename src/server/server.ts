@@ -1,50 +1,33 @@
 import express from 'express'
 import { createServer } from 'node:http'
-import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
-import { Server } from 'socket.io'
-import { query } from './db'
-import dotenv from 'dotenv'
+import path from 'path'
 import authRoutes from './routes/auth'
+import dotenv from 'dotenv'
+import passport from 'passport'
 
 dotenv.config()
 
 const app = express()
-const server = createServer(app)
-const io = new Server(server)
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
 const port = process.env.PORT || 3000
+const server = createServer(app)
 
 app.use(express.json())
-app.use(express.static(join(__dirname, '../..', 'dist')))
+app.use(express.urlencoded({ extended: true }))
+app.use(passport.initialize())
 
+// Serve static files from the 'dist' directory
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
+const staticPath = path.join(__dirname, '..', '..', 'dist')
+app.use(express.static(staticPath))
+
+// API routes
 app.use('/api', authRoutes)
 
-app.get('/hello', async (req, res) => {
-  try {
-    const result = await query('SELECT NOW()')
-    res.json({ message: 'Hello from Express with TypeScript!', time: result.rows[0].now })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: 'Database connection failed' })
-  }
-})
-
+// Handle all other routes by serving the index.html
 app.get('*', (req, res) => {
-  res.sendFile(join(__dirname, '../..', 'dist', 'index.html'))
-})
-
-io.on('connection', (socket) => {
-  console.log('A user connected')
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected')
-  })
+  res.sendFile(path.join(staticPath, 'index.html'))
 })
 
 server.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`)
+  console.log(`Server is running on port ${port}`)
 })

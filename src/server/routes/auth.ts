@@ -1,69 +1,81 @@
-import express from 'express'
-import bcrypt from 'bcrypt'
+import express, { Request, Response } from 'express'
+import passport from 'passport'
 import jwt from 'jsonwebtoken'
-import { query } from '../db'
-import { validateRegistration } from '../middleware/validationMiddleware'
+import bcrypt from 'bcrypt'
+import { Strategy as LocalStrategy } from 'passport-local'
+import { db } from '../db'
 
 const router = express.Router()
 
-// User Registration
-router.post('/register', validateRegistration, async (req, res) => {
+// Configure Passport Local Strategy
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      const user = await db.query('SELECT * FROM users WHERE username = $1', [
+        username,
+      ])
+
+      if (user.rows.length === 0) {
+        return done(null, false, { message: 'Incorrect username.' })
+      }
+
+      const validPassword = await bcrypt.compare(
+        password,
+        user.rows[0].password,
+      )
+
+      if (!validPassword) {
+        return done(null, false, { message: 'Incorrect password.' })
+      }
+
+      return done(null, user.rows[0])
+    } catch (error) {
+      return done(error)
+    }
+  }),
+)
+
+// Serialize user for session
+passport.serializeUser((user: any, done: any) => {
+  done(null, user.id)
+})
+
+// Deserialize user from session
+passport.deserializeUser(async (id: number, done: any) => {
   try {
-    const { username, email, password } = req.body
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // Insert the user into the database
-    const result = await query(
-      'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email', // Corrected query
-      [username, email, hashedPassword],
-    )
-
-    const user = result.rows[0]
-
-    // Generate a JWT token
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key', { // Use environment variable
-      expiresIn: '1h',
-    })
-
-    res.status(201).json({ user: { id: user.id, username: user.username, email: user.email }, token })
+    const user = await db.query('SELECT * FROM users WHERE id = $1', [id])
+    done(null, user.rows[0])
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Registration failed', error: (error as Error).message })
+    done(error)
   }
 })
 
-// User Login
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body
+router.post('/login', (req: Request, res: Response, next: any) => {
+  passport.authenticate(
+    'local',
+    { session: false },
+    (err: Error, user: any, info: any) => {
+      if (err) {
+        return next(err)
+      }
+      if (!user) {
+        return res.status(400).json({ message: info.message })
+      }
 
-    // Check if the user exists
-    const result = await query('SELECT * FROM users WHERE email = $1', [email])
-    const user = result.rows[0]
+      req.login(user, { session: false }, (err) => {
+        if (err) {
+          return next(err)
+        }
 
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' })
-    }
+        // Generate JWT token
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key', {
+          expiresIn: '1h',
+        })
 
-    // Compare passwords
-    const passwordMatch = await bcrypt.compare(password, user.password)
-
-    if (!passwordMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' })
-    }
-
-    // Generate a JWT token
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'your-secret-key', { // Use environment variable
-      expiresIn: '1h',
-    })
-
-    res.status(200).json({ user: { id: user.id, username: user.username, email: user.email }, token })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Login failed', error: (error as Error).message })
-  }
+        return res.json({ token })
+      })
+    },
+  )(req, res, next)
 })
 
 export default router
